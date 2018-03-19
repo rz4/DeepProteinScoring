@@ -51,6 +51,8 @@ if __name__ == '__main__':
 
     # Read Target PDB
     with open(target_path, 'r') as f: target_data = f.readlines()
+    if not os.path.exists('MOL2'): os.mkdir('MOL2')
+    if not os.path.exists('TMP'): os.mkdir('TMP')
 
     for i in range(len(tasks)):
 
@@ -62,7 +64,7 @@ if __name__ == '__main__':
         with open(pdb_path, 'r') as f: pdb_data = f.readlines()
 
         # Write combined PDB data
-        with open('LGA/MOL2/'+pdb_id+'.'+target_id, 'w') as f:
+        with open('MOL2/'+pdb_id+'.'+target_id, 'w') as f:
             f.write('MOLECULE ' + pdb_id + '\n')
             f.writelines(pdb_data)
             if "END" not in pdb_data[-1]: f.write('END\n')
@@ -73,4 +75,4 @@ if __name__ == '__main__':
         # Calculate GDT_TS using LGA
         lga_syscall = "LGA/lga.linux " + lga_command + ' ' + pdb_id+'.'+target_id
         os.system(lga_syscall + ' >> ' + data_folder + 'scores/' + pdb_id)
-        os.remove('LGA/MOL2/'+pdb_id+'.'+target_id)
+        os.remove('MOL2/'+pdb_id+'.'+target_id)
