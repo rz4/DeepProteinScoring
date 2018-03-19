@@ -74,5 +74,7 @@ if __name__ == '__main__':
 
         # Calculate GDT_TS using LGA
         lga_syscall = "LGA/lga.linux " + lga_command + ' ' + pdb_id+'.'+target_id
-        os.system(lga_syscall + ' >> ' + data_folder + 'scores/' + pdb_id)
+        os.system(lga_syscall)
         os.remove('MOL2/'+pdb_id+'.'+target_id)
+        os.remove('TMP/'+pdb_id+'.'+target_id + '.pdb')
+        os.rename('TMP/'+pdb_id+'.'+target_id + '.lga', data_folder + 'scores/' + pdb_id)
