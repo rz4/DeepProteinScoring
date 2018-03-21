@@ -8,13 +8,13 @@ import h5py as hp
 import numpy as np
 
 # Data folder paths
-data_folders = ['../../../../data/T0882/',
-                '../../../../data/T0866/',
-                '../../../../data/T0867/',
-                '../../../../data/T0868/']
+data_folders = ['../../../data/T0882/',
+                '../../../data/T0866/',
+                '../../../data/T0867/',
+                '../../../data/T0868/']
 
 # Combined folder path
-combined_folder = '../../../../data/TargetSet0/'
+combined_folder = '../../../data/TargetSet0/'
 
 ################################################################################
 seed = 1234

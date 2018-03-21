@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     # Setup HDF5 file and dataset
     print("Storing to HDF5 file...")
-    f = hp.File(data_folder+"torsion_pairwise_casp_data.hdf5", "w")
+    f = hp.File(data_folder+"torsion_pairwise_data.hdf5", "w")
     grp = f.create_group("dataset")
 
     # Write training data

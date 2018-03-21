@@ -18,7 +18,7 @@ from itertools import combinations
 from time import time
 
 # Data generation parameters
-data_folder = '../../../../../data/T0882/'
+data_folder = '../../../data/T0882/'
 diheral_bin_count = 19
 pairwise_distance_bins = [5+(5*i) for i in range(9)]
 seed = 458762

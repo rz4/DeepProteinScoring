@@ -8,7 +8,6 @@ than or less than a specified GDT score threshold. This ranking-CNN approach has
 shown greater capacity at binning input data into correct GDT ranges than a
 multi-class network.
 
-
 '''
 import os
 import h5py as hp
@@ -37,6 +36,7 @@ if __name__ == '__main__':
 
     # Set paths relative to this file
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    if not os.path.exists(model_folder): os.mkdir(model_folder)
 
     # Gather ids and GDT-MM scores from csv
     ids = []
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         for i in range(len(lines)):
             x = lines[i].split(',')
             if i > 1 and len(x) == 4:
-                id_ = x[0]; score = float(x[2])
+                id_ = x[0]; score = float(x[1])
                 ids.append(id_); scores.append(score)
     x_data = np.array(ids)
     scores = np.array(scores)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
 
     # Load HDF5 dataset
-    f = hp.File(data_folder+"torsion_pairwise_casp_data.hdf5", "r")
+    f = hp.File(data_folder+"torsion_pairwise_data.hdf5", "r")
     data_set = f['dataset']
 
     # Train Rankings
