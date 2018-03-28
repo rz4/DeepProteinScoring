@@ -1,30 +1,27 @@
 '''
 generate_data.py
-Updated: 3/9/18
+Updated: 3/29/18
 
-This script is used to generate torsion angle and pairwise distance matricies
-used for convolutional neural network training. The script will store
-representations in HDF5 file for defined data folder. This script is used specifically
-to generate data used for CASP experiments.
-
+This script is used to generate torsion angle matricies used for convolutional
+neural network training. The script will store representations in npz files
+within a /torsion_data/ subdirectory.This script is used specifically to
+generate data used for CASP experiments.
 
 '''
 import os
 import numpy as np
 from mpi4py import MPI
 from scipy.ndimage.filters import gaussian_filter
-from scipy.spatial.distance import pdist
-from itertools import combinations
-from time import time
 
 # Data generation parameters
-data_folder = '../../../data/T0882/'
+data_folder = '../../../data/Test/'
 diheral_bin_count = 19
-pairwise_distance_bins = [5+(5*i) for i in range(9)]
-seed = 458762
 
 ################################################################################
 
+# Static Parameters
+chain = 'A' # Chain Id might need to be changed for PDBs missing identifier
+seed = 458762 # For random distribution of tasks using MPI
 residues = ['ALA', 'ARG', 'ASN', 'ASP', 'ASX', 'CYS', 'GLN',
             'GLU', 'GLX', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
             'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR',
@@ -121,10 +118,15 @@ def calculate_dihedral_angles(protein_data):
 
         # Get atom coordinates for phi and psi angles
         amino_0 = np.array(protein_data[i-1])
+        c_0 = amino_0[np.where(amino_0[:,1] == 'C')][:,2:]
         amino_1 = np.array(protein_data[i])
+        n_1 = amino_1[np.where(amino_1[:,1] == 'N')][:,2:]
+        ca_1 = amino_1[np.where(amino_1[:,1] == 'CA')][:,2:]
+        c_1 = amino_1[np.where(amino_1[:,1] == 'C')][:,2:]
         amino_2 = np.array(protein_data[i+1])
-        phi_atoms = np.concatenate([amino_0[2:3,2:],amino_1[:3,2:]])
-        psi_atoms = np.concatenate([amino_1[:3,2:],amino_2[0:1,2:]])
+        n_2 = amino_2[np.where(amino_2[:,1] == 'N')][:,2:]
+        phi_atoms = np.concatenate([c_0,n_1,ca_1,c_1],axis=0)
+        psi_atoms = np.concatenate([n_1,ca_1,c_1,n_2],axis=0)
 
         # Calculate dihedral angle phi and psi
         phi = dihedral_angle(phi_atoms.astype('float'))
@@ -176,43 +178,6 @@ def bin_dihedral_angles(protein_data, diheral_bin_count):
 
     return binned_dihedral_angles
 
-def bin_pairwise_distances(protein_data, pairwise_distance_bins):
-    '''
-    Method bins pairwise distances of residue alpha carbons into 2D data grids.
-
-    Params:
-        protein_data - np.array;
-        pairwise_distance_bins - list; list of bins used to bin pairwise distances
-
-    Returns:
-        binned_pairwise - np.array;
-
-    '''
-    # Get alpha carbons
-    alpha_carbons = []
-    for i in range(len(protein_data)):
-        alpha_carbons.append(protein_data[i][1])
-    alpha_carbons = np.array(alpha_carbons)
-
-    # Pairwise distances
-    dist = np.array(pdist(alpha_carbons[:,2:]))
-    labels = list(combinations(alpha_carbons[:,0],2))
-    labels = np.array([i[0] + i[1] for i in labels])
-
-    # Bin pairwise distances
-    bin_x = []
-    for r1 in residues:
-        bin_y = []
-        for r2 in residues:
-            i = np.where(labels == r1+r2)
-            H, bins = np.histogram(dist[i], bins=pairwise_distance_bins)
-            H = gaussian_filter(H, 0.5)
-            bin_y.append(H)
-        bin_x.append(bin_y)
-    binned_pairwise = np.array(bin_x)
-
-    return binned_pairwise
-
 if __name__ == '__main__':
 
     # Set paths relative to this file
@@ -227,7 +192,7 @@ if __name__ == '__main__':
     if rank == 0:
         tasks = []
 
-        if not os.path.exists(data_folder+'data'): os.mkdir(data_folder+'data')
+        if not os.path.exists(data_folder+'torsion_data'): os.mkdir(data_folder+'torsion_data')
 
         # Search for data directories
         for data_path in sorted(os.listdir(data_folder+'pdbs')):
@@ -246,21 +211,20 @@ if __name__ == '__main__':
 
     for t in tasks:
         path = t
-        chain = 'A'#path.split('/')[-2].split('_')[-1]
-        save_path = '/'.join(t.split('/')[:-2]) + '/data/'+ t.split('/')[-1][:-3]+'npz'
+        save_path = '/'.join(t.split('/')[:-2]) + '/torsion_data/'+ t.split('/')[-1][:-3]+'npz'
 
         # Parse PDB
         protein_data = parse_pdb(path, chain)
-        print(path, chain, len(protein_data))
 
         try:
             # Bin diheral angles
             binned_dihedral_angles = bin_dihedral_angles(protein_data, diheral_bin_count)
 
-            # Bin pairwise distances
-            binned_pairwise_distances = bin_pairwise_distances(protein_data, pairwise_distance_bins)
-
             # Save data
-            np.savez(save_path, binned_dihedral_angles, binned_pairwise_distances)
+            np.savez(save_path, binned_dihedral_angles)
 
-        except: print("Error generating...")
+            print("Generated:", '/'.join(save_path.split('/')[-3:]))
+
+        except: print("Error generating data...")
+
+    print("Data Generation Complete.")

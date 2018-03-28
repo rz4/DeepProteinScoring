@@ -1,4 +1,7 @@
 '''
+networks.py
+Updated: 3/27/18
+
 '''
 from keras.models import Model
 from keras.optimizers import Adam

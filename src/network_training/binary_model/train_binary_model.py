@@ -1,5 +1,5 @@
 '''
-train_ranking_network.py
+train_cascading_model.py
 Updated: 3/15/18
 
 This script is used to train a ranking-CNN which is a series of binary classifiers
@@ -9,6 +9,7 @@ shown greater capacity at binning input data into correct GDT ranges than a
 multi-class network.
 
 '''
+import sys; sys.path.insert(0, '../')
 import os
 import h5py as hp
 import numpy as np
@@ -21,12 +22,12 @@ from sklearn.model_selection import train_test_split
 epochs = 3 # epochs of traning for each binary classifier
 batch_size = 100
 model_def = PairwiseNet_v1
-model_folder = '../../../../models/TargetSet0_ranked/'
+model_folder = '../../../models/TargetSet0_ranked/'
 
 # Data Parameters
-data_folder = '../../../../data/TargetSet0/'
+data_folder = '../../../data/TargetSet0/'
 ranks = [0.5, 0.6, 0.7, 0.8, 0.9]
-data_type = '-pairwise' # '-pairwise', '-torsion'
+data_type = 'pairwise' # 'pairwise', 'torsion'
 split = [0.7, 0.1, 0.2]
 seed = 678452
 
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
 
     # Load HDF5 dataset
-    f = hp.File(data_folder+"torsion_pairwise_data.hdf5", "r")
+    f = hp.File(data_folder + data_type + "_data.hdf5", "r")
     data_set = f['dataset']
 
     # Train Rankings
@@ -97,7 +98,7 @@ if __name__ == '__main__':
             batch_x = []
             batch_y = []
             for j in tqdm(range(len(x_train))):
-                x = np.array(data_set[x_train[j]+data_type])
+                x = np.array(data_set[x_train[j]])
                 batch_x.append(x)
                 y = one_hot(y_train[j], num_classes=2)
                 batch_y.append(y)
@@ -122,7 +123,7 @@ if __name__ == '__main__':
             batch_x = []
             batch_y = []
             for j in tqdm(range(len(x_val))):
-                x = np.array(data_set[x_val[j]+data_type])
+                x = np.array(data_set[x_val[j]])
                 batch_x.append(x)
                 y = one_hot(y_val[j], num_classes=2)
                 batch_y.append(y)
@@ -180,7 +181,7 @@ if __name__ == '__main__':
         batch_j = []
         for j in tqdm(range(len(x_test))):
             if rankings_dict[x_test[j]][1] == i:
-                x = np.array(data_set[x_test[j]+data_type])
+                x = np.array(data_set[x_test[j]])
                 batch_x.append(x)
                 batch_j.append(j)
             if len(batch_x) == batch_size or j+1 == len(x_test):

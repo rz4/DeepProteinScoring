@@ -1,6 +1,9 @@
 '''
 calculate_GDTTS.py
-Updated: 3/19/18
+Updated: 3/29/18
+
+This script is used to calcualate the GDTTS score of a given decoy using the LGA
+package. LGA output files are stored in the /scores/ subdirectory in data folder.
 
 '''
 import os
@@ -9,10 +12,10 @@ from mpi4py import MPI
 
 # Data Parameters
 data_folder = '../../../data/T0868-D1/'
-lga_command = '-3 -ie -o0 -sda -d:4'
-seed = 64579
+lga_command = '-3 -ie -o0 -sda -d:4' # May need to change if decoy and target don't line up
 
 ################################################################################
+seed = 64579 # For random distribution of tasks using MPI
 
 if __name__ == '__main__':
 

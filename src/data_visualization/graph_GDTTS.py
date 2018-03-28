@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Data parameters
-data_folder = '../../../data/T0866/'
+data_folder = '../../../data/T0895D1/'
 
 ################################################################################
 
