@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # Gather ids and GDT-TS scores from csv
     ids = []
     scores = []
-    data_folder = '/'.join(data_path.split('/')[:-1])
+    data_folder = '/'.join(data_path.split('/')[:-1]) +'/'
     with open(data_folder+data_folder.split('/')[-2]+'.csv', 'r') as f:
         lines = f.readlines()
         for i in range(len(lines)):
@@ -202,5 +202,5 @@ if __name__ == '__main__':
     history = np.array(history)
     test_footer = 'Test [acc]: ' + str(test_acc)
     np.savetxt(model_folder+'results.csv', history, fmt= '%1.3f', delimiter=', ',
-               header='LABELS: rank, epoch, loss, acc, val_loss, val_acc',
+               header='LABELS: threshold, epoch, loss, acc, val_loss, val_acc',
                footer=test_footer)

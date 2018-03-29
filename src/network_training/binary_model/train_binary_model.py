@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # Gather ids and GDT-TS scores from csv
     ids = []
     scores = []
-    data_folder = '/'.join(data_path.split('/')[:-1])
+    data_folder = '/'.join(data_path.split('/')[:-1]) + '/'
     with open(data_folder+data_folder.split('/')[-2]+'.csv', 'r') as f:
         lines = f.readlines()
         for i in range(len(lines)):
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     history = []
     best_val_loss = None
     for epoch in range(epochs):
-        print("Epoch", epoch, ':', "Score Threshold:", rank)
+        print("Epoch", epoch, ':', "Score Threshold:", threshold)
 
         # Fit training data
         print('Fitting:')
@@ -138,7 +138,7 @@ if __name__ == '__main__':
             # Save weights of model
             model.save_weights(model_path+'.hdf5')
 
-        history.append([rank, epoch, train_loss, train_acc, val_loss, val_acc])
+        history.append([threshold, epoch, train_loss, train_acc, val_loss, val_acc])
 
     # Load best weights
     model.load_weights(model_path+'.hdf5')
@@ -179,5 +179,5 @@ if __name__ == '__main__':
     history = np.array(history)
     test_footer = 'Test [loss, acc]: '+str(test_loss)+','+str(test_acc)
     np.savetxt(model_folder+'results.csv', history, fmt= '%1.3f', delimiter=', ',
-               header='LABELS: rank, epoch, loss, acc, val_loss, val_acc',
+               header='LABELS: threshold, epoch, loss, acc, val_loss, val_acc',
                footer=test_footer)
