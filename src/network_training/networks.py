@@ -49,7 +49,7 @@ def PairwiseNet_v1(nb_class):
     '''
     '''
     # Input
-    x = Input(shape=(23, 23, 8))
+    x = Input(shape=(23, 23, 9))
 
     # Conv Block 1
     l = Conv2D(64, (3, 3), padding='valid')(x)
@@ -83,22 +83,24 @@ def PairwiseNet_v2(nb_class):
     '''
     '''
     # Input
-    x = Input(shape=(23, 23, 8))
+    x = Input(shape=(23, 23, 9))
 
     # Conv Block 1
-    l = Conv2D(64, (3, 3), padding='valid')(x)
+    l = Conv2D(64, (5, 5), padding='valid')(x)
     l = Activation('relu')(l)
     l = Dropout(0.25)(l)
     l = MaxPooling2D((2,2))(l)
 
     # Conv Block 2
-    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Conv2D(128, (5, 5), padding='valid')(l)
     l = Activation('relu')(l)
     l = Dropout(0.25)(l)
     l = MaxPooling2D((2,2))(l)
 
     # Fully Connected Layer
     l = Flatten()(l)
+    l = Dense(1024, activation='relu')(l)
+    l = Dropout(0.5)(l)
     l = Dense(1024, activation='relu')(l)
     l = Dropout(0.5)(l)
 

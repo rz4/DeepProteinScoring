@@ -2,9 +2,9 @@
 train_cascading_model.py
 Updated: 3/15/18
 
-This script is used to train a ranking-CNN which is a series of binary classifiers
+This script is used to train a cascading-CNN which is a series of binary classifiers
 which determine whether a given input feature grid of protein structures are greater
-than or less than a specified GDT score threshold. This ranking-CNN approach has
+than or less than a specified GDT score threshold. This cascading-CNN approach has
 shown greater capacity at binning input data into correct GDT ranges than a
 multi-class network.
 
@@ -19,19 +19,19 @@ from keras.utils import to_categorical as one_hot
 from sklearn.model_selection import train_test_split
 
 # Network Training Parameters
-epochs = 3 # epochs of traning for each binary classifier
+epochs = 1
 batch_size = 100
-model_def = PairwiseNet_v1
-model_folder = '../../../models/TargetSet0_ranked/'
+model_def = PairwiseNet_v2
+model_folder = '../../../models/T0882_casc_pairwise/'
 
 # Data Parameters
-data_folder = '../../../data/TargetSet0/'
+data_path = '../../../data/T0882/pairwise_data.hdf5'
 ranks = [0.5, 0.6, 0.7, 0.8, 0.9]
-data_type = 'pairwise' # 'pairwise', 'torsion'
-split = [0.7, 0.1, 0.2]
-seed = 678452
 
 ################################################################################
+
+split = [0.7, 0.1, 0.2]
+seed = 678452
 
 if __name__ == '__main__':
 
@@ -39,14 +39,15 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
     if not os.path.exists(model_folder): os.mkdir(model_folder)
 
-    # Gather ids and GDT-MM scores from csv
+    # Gather ids and GDT-TS scores from csv
     ids = []
     scores = []
+    data_folder = '/'.join(data_path.split('/')[:-1])
     with open(data_folder+data_folder.split('/')[-2]+'.csv', 'r') as f:
         lines = f.readlines()
         for i in range(len(lines)):
             x = lines[i].split(',')
-            if i > 1 and len(x) == 4:
+            if i >= 1:
                 id_ = x[0]; score = float(x[1])
                 ids.append(id_); scores.append(score)
     x_data = np.array(ids)
@@ -56,13 +57,21 @@ if __name__ == '__main__':
     x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
 
     # Load HDF5 dataset
-    f = hp.File(data_folder + data_type + "_data.hdf5", "r")
+    f = hp.File(data_path, "r")
     data_set = f['dataset']
 
     # Train Rankings
     for i in range(len(ranks)):
 
         rank = ranks[i]
+
+        # Load Model
+        if i == 0:
+            model, loss, optimizer, metrics = model_def(2)
+            model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
+            model.summary()
+        else: model.load_weights(model_path+'.hdf5')
+        model_path = model_folder+model_def.__name__+'_'+str(rank)
 
         # Split into binary classification problem.
         print('Forming Binary Classification At Threshold:', rank)
@@ -76,21 +85,11 @@ if __name__ == '__main__':
         # Split file paths into training, test and validation
         x_train, x_val, y_train, y_val = train_test_split(x_data, y_data, test_size=split[1]/(split[0]+split[1]), random_state=seed)
 
-        if i == 0:
-            # Load Model
-            model, loss, optimizer, metrics = model_def(2)
-            model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
-            model.summary()
-        else:
-            # Load weights of best model
-            model.load_weights(model_path+'.hdf5')
-        model_path = model_folder+model_def.__name__+'_'+str(rank)+data_type
-
         # Training Loop
         history = []
         best_val_loss = None
         for epoch in range(epochs):
-            print("Epoch", epoch, ':', "Ranking Threshold:", rank)
+            print("Epoch", epoch, ':', "Score Threshold:", rank)
 
             # Fit training data
             print('Fitting:')
@@ -127,7 +126,7 @@ if __name__ == '__main__':
                 batch_x.append(x)
                 y = one_hot(y_val[j], num_classes=2)
                 batch_y.append(y)
-                if len(batch_x) == batch_size or j+1 == len(x_train):
+                if len(batch_x) == batch_size or j+1 == len(x_val):
                     batch_x = np.array(batch_x)
                     batch_y = np.array(batch_y)
                     output = model.test_on_batch(batch_x, batch_y)
@@ -163,20 +162,16 @@ if __name__ == '__main__':
         ranks_list.append([rank, 0])
     rankings_dict = dict(zip(x_test, ranks_list))
 
-    # Load Model
-    model, loss, optimizer, metrics = model_def(2)
-    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
-
     # Evaluate test data
     for i in range(len(ranks)):
         rank = ranks[i]
 
         # Load weights of best model
-        model_path = model_folder+model_def.__name__+'_'+str(rank)+data_type
+        model_path = model_folder+model_def.__name__+'_'+str(rank)
         model.load_weights(model_path+'.hdf5')
 
         # Get inference results
-        print("Running Inference On Rank:", rank)
+        print("Running Inference On Threshold:", rank)
         batch_x = []
         batch_j = []
         for j in tqdm(range(len(x_test))):
