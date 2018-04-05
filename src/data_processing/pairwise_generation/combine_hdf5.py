@@ -14,12 +14,20 @@ import h5py as hp
 import numpy as np
 
 # Data folder paths
-data_folders = ['../../../data/Test/',
-                '../../../data/Test0/',
-                '../../../data/Test1/']
+data_folders = ['../../data/T0862D1/',
+                '../../data/T0865D1/',
+                '../../data/T0870D1/',
+                '../../data/T0885D1/',
+                '../../data/T0887D1/',
+                '../../data/T0890D2/',
+                '../../data/T0892D1/',
+                '../../data/T0893D1/',
+                '../../data/T0898D1/',
+                '../../data/T0915D1/',
+                '../../data/T0922D1/']
 
 # Combined folder path
-combined_folder = '../../../data/CTest/'
+combined_folder = '../../../data/AlphaSet/'
 
 ################################################################################
 
@@ -31,6 +39,7 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
     if not os.path.exists(combined_folder): os.mkdir(combined_folder)
 
+    '''
     # Combine CSVs
     print("Combining CSVs...")
     data = []
@@ -43,6 +52,7 @@ if __name__ == '__main__':
         f.write("ID,GDT_TS\n")
         f.writelines(data)
     print('Complete:', combined_folder+combined_folder.split('/')[-2]+'.csv')
+    '''
 
     # Combine HDF5 datasets
     print("Combining HDF5s...")

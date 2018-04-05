@@ -15,8 +15,10 @@ data_folders = ['../../data/T0862D1/',
                 '../../data/T0885D1/',
                 '../../data/T0887D1/',
                 '../../data/T0890D2/',
-                '../../data/T0893D1/',
                 '../../data/T0892D1/',
+                '../../data/T0893D1/',
+                '../../data/T0898D1/',
+                '../../data/T0915D1/',
                 '../../data/T0922D1/']
 
 ################################################################################
@@ -37,6 +39,7 @@ if __name__ == '__main__':
             for l in lines[1:]:
                 score = l.split(',')[1]
                 scores.append(float(score))
+        print(data_folder, len(scores))
         targets.append(scores)
 
     # Display histogram
