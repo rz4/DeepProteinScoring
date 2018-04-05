@@ -12,7 +12,7 @@ import numpy as np
 from tqdm import tqdm
 
 # Data Parameters
-data_folder = '../../../data/T0895D1/'
+data_folder = '../../../data/T0870D1/'
 
 ################################################################################
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # Read scores
     ids = []
     scores = []
-    for data_path in sorted(os.listdir(data_folder+'scores')):
+    for data_path in tqdm(sorted(os.listdir(data_folder+'scores'))):
         with open(data_folder+'scores/'+data_path, 'r') as f:
             for l in f:
                 if l.startswith('SUMMARY(GDT)'):

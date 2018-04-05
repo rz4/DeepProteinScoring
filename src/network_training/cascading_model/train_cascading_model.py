@@ -97,7 +97,8 @@ if __name__ == '__main__':
             batch_x = []
             batch_y = []
             for j in tqdm(range(len(x_train))):
-                x = np.array(data_set[x_train[j]])
+                try: x = np.array(data_set[x_train[j]])
+                except: continue
                 batch_x.append(x)
                 y = one_hot(y_train[j], num_classes=2)
                 batch_y.append(y)
@@ -122,7 +123,8 @@ if __name__ == '__main__':
             batch_x = []
             batch_y = []
             for j in tqdm(range(len(x_val))):
-                x = np.array(data_set[x_val[j]])
+                try: x = np.array(data_set[x_val[j]])
+                except: continue
                 batch_x.append(x)
                 y = one_hot(y_val[j], num_classes=2)
                 batch_y.append(y)
@@ -163,6 +165,7 @@ if __name__ == '__main__':
     rankings_dict = dict(zip(x_test, ranks_list))
 
     # Evaluate test data
+    possible_hits = 0
     for i in range(len(ranks)):
         rank = ranks[i]
 
@@ -176,7 +179,9 @@ if __name__ == '__main__':
         batch_j = []
         for j in tqdm(range(len(x_test))):
             if rankings_dict[x_test[j]][1] == i:
-                x = np.array(data_set[x_test[j]])
+                try: x = np.array(data_set[x_test[j]])
+                except: continue
+                possible_hits += 1
                 batch_x.append(x)
                 batch_j.append(j)
             if len(batch_x) == batch_size or j+1 == len(x_test):
@@ -195,7 +200,7 @@ if __name__ == '__main__':
         ranking = rankings_dict[key]
         if ranking[0] == ranking[1]:
             hits += 1
-    test_acc = float(hits) / len(x_test)
+    test_acc = float(hits) / len(possible_hits)
     print("Test Accuracy:", test_acc)
 
     # Save training history to csv file
