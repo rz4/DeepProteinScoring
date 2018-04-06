@@ -31,6 +31,7 @@ if __name__ == '__main__':
     # Load GDT_TS scores from csv
     targets = []
     labels = []
+    total = 0
     for data_folder in data_folders:
         scores = []
         labels.append(data_folder.split('/')[-2])
@@ -39,8 +40,9 @@ if __name__ == '__main__':
             for l in lines[1:]:
                 score = l.split(',')[1]
                 scores.append(float(score))
-        print(data_folder, len(scores))
+        total += len(scores)
         targets.append(scores)
+    print("Total Decoys", total)
 
     # Display histogram
     font = {'family' : 'normal', 'weight' : 'bold', 'size'   : 22}

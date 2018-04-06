@@ -13,7 +13,7 @@ from mpi4py import MPI
 # Data Parameters
 data_folder = '../../../data/T0892D1/'
 lga_command = '-3 -ie -o0 -ch1:A -sda -d:4' # May need to change if decoy and target don't line up
-
+# -sda or -aa1:n1:n2
 ################################################################################
 seed = 64579 # For random distribution of tasks using MPI
 
