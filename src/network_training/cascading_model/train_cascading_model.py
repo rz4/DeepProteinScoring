@@ -101,6 +101,7 @@ if __name__ == '__main__':
                 except: continue
                 batch_x.append(x)
                 y = one_hot(y_train[j], num_classes=2)
+                #y = y.reshape((2))
                 batch_y.append(y)
                 if len(batch_x) == batch_size or j+1 == len(x_train):
                     batch_x = np.array(batch_x)
@@ -127,6 +128,7 @@ if __name__ == '__main__':
                 except: continue
                 batch_x.append(x)
                 y = one_hot(y_val[j], num_classes=2)
+                #y = y.reshape((2))
                 batch_y.append(y)
                 if len(batch_x) == batch_size or j+1 == len(x_val):
                     batch_x = np.array(batch_x)
