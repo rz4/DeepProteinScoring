@@ -74,6 +74,16 @@ if __name__ == '__main__':
     x_test = np.array(x_test)
     y_test_scores = np.array(y_test_scores)
 
+    # Shuffle Chunks
+    x_data_ = x_data[:2560000].reshape(-1,10000)
+    y_scores_ = y_scores[:2560000].reshape(-1,10000)
+    np.random.seed(seed)
+    p = np.random.permutation(len(x_data_))
+    x_data_ = x_data_[p]
+    y_scores_ = y_scores_[p]
+    x_data = np.concatenate([x_data_.flatten(),x_data[2560000:]])
+    y_scores = np.concatenate([y_scores_.flatten(),y_scores[2560000:]])
+
     # Split training and test data
     #x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
 
@@ -100,7 +110,10 @@ if __name__ == '__main__':
         print('Positive:',len(np.where(y_data == 1)[0]),'Negative:', len(np.where(y_data == 0)[0]))
 
         # Split file paths into training, test and validation
-        #x_train, x_val, y_train, y_val = train_test_split(x_data, y_data, test_size=split[1]/(split[0]+split[1]), random_state=seed)
+        x_train = x_data[510000:]
+        x_val = x_data[:510000]
+        y_train = y_data[510000:]
+        y_val = y_data[:510000]
 
         # Training Loop
         history = []
@@ -110,16 +123,17 @@ if __name__ == '__main__':
 
             # Fit training data
             print('Fitting:')
+            err = 0
             train_status = []
             batch_x = []
             batch_y = []
-            hset_ = x_data[0].split('_')[0]
+            hset_ = x_train[0].split('_')[0]
             f = hp.File(data_path+hset_+'.hdf5', "r")
             data_set = f['dataset']
-            for j in tqdm(range(len(x_data))):
-                xx = x_data[j].split('_')
+            for j in tqdm(range(len(x_train))):
+                xx = x_train[j].split('_')
                 hset = xx[0]
-                dset = x_data[j][len(hset)+1:]
+                dset = x_train[j][len(hset)+1:]
                 if hset != hset_:
                     hset_ = hset
                     f.close()
@@ -128,13 +142,13 @@ if __name__ == '__main__':
                 try:
                     x = np.array(data_set[dset])
                 except:
-                    print("Error:", x_data[j])
+                    err += 1
                     continue
                 batch_x.append(x)
-                y = one_hot(y_data[j], num_classes=2)
+                y = one_hot(y_train[j], num_classes=2)
                 #y = y.reshape((2))
                 batch_y.append(y)
-                if len(batch_x) == batch_size or j+1 == len(x_data):
+                if len(batch_x) == batch_size or j+1 == len(x_train):
                     batch_x = np.array(batch_x)
                     batch_y = np.array(batch_y)
                     output = model.train_on_batch(batch_x, batch_y)
@@ -148,25 +162,30 @@ if __name__ == '__main__':
             train_acc = np.average(train_status[:,1])
             print('Train Loss ->', train_loss)
             print('Train Accuracy ->', train_acc,'\n')
+            print('Errored Entries:', err)
 
-            ''''
             # Test on validation data
             print('Evaluating:')
+            err = 0
             val_status = []
             batch_x = []
             batch_y = []
+            hset_ = x_val[0].split('_')[0]
+            f = hp.File(data_path+hset_+'.hdf5', "r")
+            data_set = f['dataset']
             for j in tqdm(range(len(x_val))):
                 xx = x_val[j].split('_')
                 hset = xx[0]
                 dset = x_val[j][len(hset)+1:]
-                try:
-                    # Load HDF5 dataset
+                if hset != hset_:
+                    hset_ = hset
+                    f.close()
                     f = hp.File(hset+'.hdf5', "r")
                     data_set = f['dataset']
+                try:
                     x = np.array(data_set[dset])
-                    f.close()
                 except:
-                    print("Error:", x_val[j])
+                    err += 1
                     continue
                 batch_x.append(x)
                 y = one_hot(y_val[j], num_classes=2)
@@ -186,15 +205,14 @@ if __name__ == '__main__':
             val_acc = np.average(val_status[:,1])
             print('Val Loss ->', val_loss)
             print('Val Accuracy ->', val_acc,'\n')
+            print('Errored Entries:', err)
 
-
-            '''
-            if best_val_loss == None or train_loss < best_val_loss:
-                best_val_loss = train_loss
+            if best_val_loss == None or val_loss < best_val_loss:
+                best_val_loss = val_loss
                 # Save weights of model
                 model.save_weights(model_path+'.hdf5')
 
-            history.append([rank, epoch, train_loss, train_acc, 0.0, 0.0])
+            history.append([rank, epoch, train_loss, train_acc, val_loss, val_acc])
 
     # Get ranks of test set and store in dict
     ranks_list = []
@@ -237,12 +255,8 @@ if __name__ == '__main__':
                     data_set = f['dataset']
                 try:
                     x = np.array(data_set[dset])
-                    f.close()
                 except:
-                    print("Error:", x_train[j])
                     continue
-                try: x = np.array(data_set[x_test[j]])
-                except: continue
                 possible_hits += 1
                 batch_x.append(x)
                 batch_j.append(j)
@@ -262,7 +276,7 @@ if __name__ == '__main__':
         ranking = rankings_dict[key]
         if ranking[0] == ranking[1]:
             hits += 1
-    test_acc = float(hits) / len(possible_hits)
+    test_acc = float(hits) / possible_hits
     print("Test Accuracy:", test_acc)
 
     # Save training history to csv file
