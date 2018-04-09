@@ -19,7 +19,7 @@ from keras.utils import to_categorical as one_hot
 from sklearn.model_selection import train_test_split
 
 # Network Training Parameters
-epochs = 1
+epochs = 2
 batch_size = 100
 model_def = PairwiseNet_v2
 model_folder = '../../../models/AlphaProt_T0892D1EX/'
@@ -37,7 +37,7 @@ training_targets = ['T0862D1',
                     'T0915D1',
                     'T0922D1']
 test_targets = ['T0892D1',]
-ranks = [0.5, 0.6, 0.7, 0.8, 0.9]
+ranks = [0.3, 0.4, 0.5, 0.6, 0.7]
 
 ################################################################################
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
             batch_x = []
             batch_y = []
             hset_ = x_data[0].split('_')[0]
-            f = hp.File(hset_+'.hdf5', "r")
+            f = hp.File(data_path+hset_+'.hdf5', "r")
             data_set = f['dataset']
             for j in tqdm(range(len(x_data))):
                 xx = x_data[j].split('_')
@@ -187,12 +187,13 @@ if __name__ == '__main__':
             print('Val Loss ->', val_loss)
             print('Val Accuracy ->', val_acc,'\n')
 
-            if best_val_loss == None or val_loss < best_val_loss:
-                best_val_loss = val_loss
 
+            '''
+            if best_val_loss == None or train_loss < best_val_loss:
+                best_val_loss = train_loss
                 # Save weights of model
                 model.save_weights(model_path+'.hdf5')
-            '''
+
             history.append([rank, epoch, train_loss, train_acc, 0.0, 0.0])
 
     # Get ranks of test set and store in dict
@@ -221,15 +222,20 @@ if __name__ == '__main__':
         print("Running Inference On Threshold:", rank)
         batch_x = []
         batch_j = []
+        hset_ = x_test[0].split('_')[0]
+        f = hp.File(data_path+hset_+'.hdf5', "r")
+        data_set = f['dataset']
         for j in tqdm(range(len(x_test))):
             if rankings_dict[x_test[j]][1] == i:
                 xx = x_test[j].split('_')
                 hset = xx[0]
                 dset = x_test[j][len(hset)+1:]
-                try:
-                    # Load HDF5 dataset
+                if hset != hset_:
+                    hset_ = hset
+                    f.close()
                     f = hp.File(hset+'.hdf5', "r")
                     data_set = f['dataset']
+                try:
                     x = np.array(data_set[dset])
                     f.close()
                 except:
