@@ -137,7 +137,7 @@ if __name__ == '__main__':
                 if hset != hset_:
                     hset_ = hset
                     f.close()
-                    f = hp.File(hset+'.hdf5', "r")
+                    f = hp.File(data_path+hset+'.hdf5', "r")
                     data_set = f['dataset']
                 try:
                     x = np.array(data_set[dset])
@@ -180,7 +180,7 @@ if __name__ == '__main__':
                 if hset != hset_:
                     hset_ = hset
                     f.close()
-                    f = hp.File(hset+'.hdf5', "r")
+                    f = hp.File(data_path+hset+'.hdf5', "r")
                     data_set = f['dataset']
                 try:
                     x = np.array(data_set[dset])
@@ -251,7 +251,7 @@ if __name__ == '__main__':
                 if hset != hset_:
                     hset_ = hset
                     f.close()
-                    f = hp.File(hset+'.hdf5', "r")
+                    f = hp.File(data_path+hset+'.hdf5', "r")
                     data_set = f['dataset']
                 try:
                     x = np.array(data_set[dset])
