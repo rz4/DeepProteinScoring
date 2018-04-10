@@ -21,8 +21,8 @@ from sklearn.model_selection import train_test_split
 # Network Training Parameters
 epochs = 2
 batch_size = 100
-model_def = PairwiseNet_v2
-model_folder = '../../../models/AlphaProt_T0892D1EX/'
+model_def = PairwiseNet_v3
+model_folder = '../../../models/AlphaProt_T0887D1EX_v3/'
 
 # Data Parameters
 data_path = '../../../data/AlphaSet/'
@@ -30,13 +30,13 @@ training_targets = ['T0862D1',
                     'T0865D1',
                     'T0870D1',
                     'T0885D1',
-                    'T0887D1',
+                    'T0892D1',
                     'T0890D2',
                     'T0893D1',
                     'T0898D1',
                     'T0915D1',
                     'T0922D1']
-test_targets = ['T0892D1',]
+test_targets = ['T0887D1',]
 ranks = [0.3, 0.4, 0.5, 0.6, 0.7]
 
 ################################################################################
@@ -75,14 +75,14 @@ if __name__ == '__main__':
     y_test_scores = np.array(y_test_scores)
 
     # Shuffle Chunks
-    x_data_ = x_data[:2560000].reshape(-1,10000)
-    y_scores_ = y_scores[:2560000].reshape(-1,10000)
+    x_data_ = x_data[:3110000].reshape(-1,10000)
+    y_scores_ = y_scores[:3110000].reshape(-1,10000)
     np.random.seed(seed)
     p = np.random.permutation(len(x_data_))
     x_data_ = x_data_[p]
     y_scores_ = y_scores_[p]
-    x_data = np.concatenate([x_data_.flatten(),x_data[2560000:]])
-    y_scores = np.concatenate([y_scores_.flatten(),y_scores[2560000:]])
+    x_data = np.concatenate([x_data_.flatten(),x_data[3110000:]])
+    y_scores = np.concatenate([y_scores_.flatten(),y_scores[3110000:]])
 
     # Split training and test data
     #x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
@@ -110,10 +110,10 @@ if __name__ == '__main__':
         print('Positive:',len(np.where(y_data == 1)[0]),'Negative:', len(np.where(y_data == 0)[0]))
 
         # Split file paths into training, test and validation
-        x_train = x_data[510000:]
-        x_val = x_data[:510000]
-        y_train = y_data[510000:]
-        y_val = y_data[:510000]
+        x_train = x_data[620000:]
+        x_val = x_data[:620000]
+        y_train = y_data[620000:]
+        y_val = y_data[:620000]
 
         # Training Loop
         history = []

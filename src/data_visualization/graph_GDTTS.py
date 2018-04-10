@@ -48,6 +48,7 @@ if __name__ == '__main__':
     font = {'family' : 'normal', 'weight' : 'bold', 'size'   : 22}
     cm = [Blues(float(i+1)/(len(targets)))[:3] for i in range(len(targets))]
     N, bins, patches = plt.hist(targets, 100, color=cm,range=(0.0,1.0), stacked=True, label=labels)
+    print(N)
     plt.xlabel('GDT_TS', font)
     plt.ylabel('Number of Decoys', font)
     plt.title('Histogram of GDT_TS Scores', font)
