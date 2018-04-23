@@ -61,6 +61,7 @@ if __name__ == '__main__':
     data_set = f['dataset']
 
     # Train Rankings
+    history = []
     for i in range(len(ranks)):
 
         rank = ranks[i]
@@ -86,7 +87,6 @@ if __name__ == '__main__':
         x_train, x_val, y_train, y_val = train_test_split(x_data, y_data, test_size=split[1]/(split[0]+split[1]), random_state=seed)
 
         # Training Loop
-        history = []
         best_val_loss = None
         for epoch in range(epochs):
             print("Epoch", epoch, ':', "Score Threshold:", rank)

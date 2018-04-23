@@ -1,12 +1,14 @@
 '''
 train_cascading_model_mulit.py
-Updated: 3/15/18
+Updated: 4/11/18
 
 This script is used to train a cascading-CNN which is a series of binary classifiers
 which determine whether a given input feature grid of protein structures are greater
 than or less than a specified GDT score threshold. This cascading-CNN approach has
 shown greater capacity at binning input data into correct GDT ranges than a
-multi-class network.
+multi-class network. This script is used to train on mulitiple target sets.
+
+Note: This script is beening updated rapidly so user discretion is advised.
 
 '''
 import sys; sys.path.insert(0, '../')
@@ -21,22 +23,24 @@ from sklearn.model_selection import train_test_split
 # Network Training Parameters
 epochs = 2
 batch_size = 100
-model_def = PairwiseNet_v3
-model_folder = '../../../models/AlphaProt_T0887D1EX_v3/'
+model_def = PairwiseNet_v2
+model_folder = '../../../models/AlphaProt_T0862D1EX_v2/'
 
 # Data Parameters
 data_path = '../../../data/AlphaSet/'
-training_targets = ['T0862D1',
+training_targets = [
+                    #'T0862D1',
                     'T0865D1',
                     'T0870D1',
                     'T0885D1',
                     'T0892D1',
                     'T0890D2',
+                    'T0887D1',
                     'T0893D1',
-                    'T0898D1',
+                    #'T0898D1',
                     'T0915D1',
                     'T0922D1']
-test_targets = ['T0887D1',]
+test_targets = ['T0862D1',]
 ranks = [0.3, 0.4, 0.5, 0.6, 0.7]
 
 ################################################################################
@@ -75,19 +79,18 @@ if __name__ == '__main__':
     y_test_scores = np.array(y_test_scores)
 
     # Shuffle Chunks
-    x_data_ = x_data[:3110000].reshape(-1,10000)
-    y_scores_ = y_scores[:3110000].reshape(-1,10000)
+    i = (len(x_data) // 10000) * 10000
+    x_data_ = x_data[:i].reshape(-1,10000)
+    y_scores_ = y_scores[:i].reshape(-1,10000)
     np.random.seed(seed)
     p = np.random.permutation(len(x_data_))
     x_data_ = x_data_[p]
     y_scores_ = y_scores_[p]
-    x_data = np.concatenate([x_data_.flatten(),x_data[3110000:]])
-    y_scores = np.concatenate([y_scores_.flatten(),y_scores[3110000:]])
-
-    # Split training and test data
-    #x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
+    x_data = np.concatenate([x_data_.flatten(),x_data[i:]])
+    y_scores = np.concatenate([y_scores_.flatten(),y_scores[i:]])
 
     # Train Rankings
+    history = []
     for i in range(len(ranks)):
 
         rank = ranks[i]
@@ -110,13 +113,13 @@ if __name__ == '__main__':
         print('Positive:',len(np.where(y_data == 1)[0]),'Negative:', len(np.where(y_data == 0)[0]))
 
         # Split file paths into training, test and validation
-        x_train = x_data[620000:]
-        x_val = x_data[:620000]
-        y_train = y_data[620000:]
-        y_val = y_data[:620000]
+        s = int((len(x_data) // 10000) * 0.2) * 10000
+        x_train = x_data[s:]
+        x_val = x_data[:s]
+        y_train = y_data[s:]
+        y_val = y_data[:s]
 
         # Training Loop
-        history = []
         best_val_loss = None
         for epoch in range(epochs):
             print("Epoch", epoch, ':', "Score Threshold:", rank)
@@ -276,7 +279,7 @@ if __name__ == '__main__':
         ranking = rankings_dict[key]
         if ranking[0] == ranking[1]:
             hits += 1
-    test_acc = float(hits) / possible_hits
+    test_acc = float(hits) / len(x_test)
     print("Test Accuracy:", test_acc)
 
     # Save training history to csv file

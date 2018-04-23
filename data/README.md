@@ -1,12 +1,12 @@
 # Directory /data/
-Updated: 04/7/18
+Updated: 04/23/18
 
 # Dataset Structure
 This directory is used to store datasets. Each new dataset should be structured
 as follows:
 
 ```
-TargetD1
+TargetD1/
 |
 |-TargetD1.pdb - Target crystal structure pbd file
 |
@@ -17,7 +17,7 @@ TargetD1
 After generating data and scores, the final dataset will be structured as follows:
 
 ```
-TargetD1
+TargetD1/
 |
 |-TargetD1.pdb
 |

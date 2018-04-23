@@ -11,7 +11,7 @@ import numpy as np
 from mpi4py import MPI
 
 # Data Parameters
-data_folder = '../../../data/T0892D1/'
+data_folder = '../../../data/T0882/'
 lga_command = '-3 -ie -o0 -ch1:A -sda -d:4' # May need to change if decoy and target don't line up
 # -sda or -aa1:n1:n2
 ################################################################################
