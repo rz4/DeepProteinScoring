@@ -10,7 +10,7 @@ processing. Descriptions for each sub-directory can be found below.
 used to extract Protein Data Bank (PDB) files from Rosetta silent files, a commonly
 used method of compressing PDB data.
 
-- [/scoring/](src/data_processing/scoring) : This sub-directory contains scripts
+- [/scoring/](scoring) : This sub-directory contains scripts
 used to calculate the GDT-TS scores for a given decoy dataset. Documentation on
 how to use these scripts can be found within the directory.
 
