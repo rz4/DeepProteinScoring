@@ -13,6 +13,10 @@
 #   un-bzipping them is a very tedious process and doing them one-by-one is 
 #   miserable. Set this script up to match your cases (it will take a few minutes, 
 #   but will be worth it) and then let it run in the background. 
+# 
+#   This script is intended to be used from within a target directory that you
+#   have created AFTER you have made subdirectories for each silent file to
+#   live in. 
 #
 #   Obviously there is NO ERROR CHECKING HERE!
 # ****************************************************************************

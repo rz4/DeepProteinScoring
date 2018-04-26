@@ -24,16 +24,42 @@
 # Obviously add as many lines as needed to match your case, and update the node
 # count accordingly. 
 # ****************************************************************************
-#SBATCH -N 2
+#SBATCH -N 8
 #SBATCH --qos=regular
 #SBATCH -L SCRATCH
-#SBATCH -t 09:00:00
+#SBATCH -t 14:00:00
 #SBATCH -C haswell
 # ****************************************************************************
-cd /global/cscratch1/sd/tjosc/casp_data/t0885/0c1/
-srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out &
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-01_0c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
 
-cd /global/cscratch1/sd/tjosc/casp_data/t0885/1c1/
-srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out &
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-01_1c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
+
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-01_2c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
+
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-02_0c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
+
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-02_1c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
+
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-02_2c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
+
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-02_3c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
+
+cd /global/cscratch1/sd/tjosc/casp_data/tutorial/t0862/01-02_4c1/
+mkdir ./pdbs/
+srun -N 1 -n 1 --cpu_bind=cores /global/project/projectdirs/m1532/RosettaCori/rosetta_src_2016.13.58602_bundle/main/source/bin/extract_pdbs.linuxgccrelease -in:file:silent_struct_type binary -in:file:silent *.out -out:prefix ./pdbs/ &
 
 wait
