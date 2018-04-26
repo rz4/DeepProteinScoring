@@ -12,7 +12,7 @@ import numpy as np
 from tqdm import tqdm
 
 # Data Parameters
-data_folder = '../../../data/T0915D1/'
+data_folder = '../../../data/T0882/'
 
 ################################################################################
 

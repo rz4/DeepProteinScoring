@@ -39,6 +39,7 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
     if not os.path.exists(combined_folder): os.mkdir(combined_folder)
 
+    '''
     # Combine CSVs
     print("Combining CSVs...")
     data = []
@@ -56,13 +57,14 @@ if __name__ == '__main__':
     # Combine HDF5 datasets
     print("Combining HDF5s...")
     c = hp.File(combined_folder+"pairwise_data.hdf5", "w")
-    c_grp = c.create_group("dataset")
     for folder in data_folders:
+        print('Combining:', folder)
+        c_grp = c.create_group(folder.split('/')[-2])
         f = hp.File(folder+"pairwise_data.hdf5", "r")
-        data_set = f['dataset']
-        for key in list(data_set.keys()):
-            x = np.array(data_set[key])
-            dset = c_grp.create_dataset(folder.split('/')[-2]+'_'+key, x.shape, dtype='f')
-            dset[:,:,:] = x[:,:,:]
+        f.copy('dataset', c_grp)
+        #for key in tqdm(list(data_set.keys())):
+            #x = np.array(data_set[key])
+            #dset = c_grp.create_dataset(folder.split('/')[-2]+'_'+key, x.shape, dtype='f')
+            #dset[:,:,:] = x[:,:,:]
+    print(c.keys())
     print("Complete:", combined_folder+"pairwise_data.hdf5")
-    '''

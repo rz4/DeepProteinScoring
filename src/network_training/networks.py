@@ -114,3 +114,65 @@ def PairwiseNet_v2(nb_class):
     metrics = [categorical_accuracy,]
 
     return model, loss, optimizer, metrics
+
+def PairwiseNet_v3(nb_class):
+    '''
+    '''
+    # Input
+    x = Input(shape=(23, 23, 9))
+
+    # Conv Block 1
+    l = Conv2D(64, (3, 3), padding='valid')(x)
+    l = Activation('relu')(l)
+    #l = Dropout(0.25)(l)
+
+    # Conv Block 2
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+    #l = Dropout(0.25)(l)
+
+    # Conv Block 3
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Conv Block 4
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Conv Block 5
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Conv Block 6
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Conv Block 7
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Conv Block 8
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Conv Block 9
+    l = Conv2D(64, (3, 3), padding='valid')(l)
+    l = Activation('relu')(l)
+
+    # Fully Connected Layer
+    l = Flatten()(l)
+    l = Dense(1024, activation='relu')(l)
+    l = Dropout(0.5)(l)
+    l = Dense(1024, activation='relu')(l)
+    l = Dropout(0.5)(l)
+
+    # Output
+    y = Dense(nb_class, activation='softmax')(l)
+
+    # Model Defintions
+    model = Model(inputs=x, outputs=y)
+    loss = categorical_crossentropy
+    optimizer = Adam(lr=0.0001,decay=0.1e-6)
+    metrics = [categorical_accuracy,]
+
+    return model, loss, optimizer, metrics

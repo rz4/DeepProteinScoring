@@ -1,12 +1,14 @@
 '''
-train_cascading_model.py
-Updated: 3/15/18
+train_cascading_model_mulit.py
+Updated: 4/11/18
 
 This script is used to train a cascading-CNN which is a series of binary classifiers
 which determine whether a given input feature grid of protein structures are greater
 than or less than a specified GDT score threshold. This cascading-CNN approach has
 shown greater capacity at binning input data into correct GDT ranges than a
-multi-class network.
+multi-class network. This script is used to train on mulitiple target sets.
+
+Note: This script is beening updated rapidly so user discretion is advised.
 
 '''
 import sys; sys.path.insert(0, '../')
@@ -19,18 +21,31 @@ from keras.utils import to_categorical as one_hot
 from sklearn.model_selection import train_test_split
 
 # Network Training Parameters
-epochs = 1
+epochs = 2
 batch_size = 100
 model_def = PairwiseNet_v2
-model_folder = '../../../models/T0882_casc_pairwise/'
+model_folder = '../../../models/AlphaProt_T0862D1EX_v2/'
 
 # Data Parameters
-data_path = '../../../data/T0882/pairwise_data.hdf5'
-ranks = [0.5, 0.6, 0.7, 0.8, 0.9]
+data_path = '../../../data/AlphaSet/'
+training_targets = [
+                    #'T0862D1',
+                    'T0865D1',
+                    'T0870D1',
+                    'T0885D1',
+                    'T0892D1',
+                    'T0890D2',
+                    'T0887D1',
+                    'T0893D1',
+                    #'T0898D1',
+                    'T0915D1',
+                    'T0922D1']
+test_targets = ['T0862D1',]
+ranks = [0.3, 0.4, 0.5, 0.6, 0.7]
 
 ################################################################################
 
-split = [0.7, 0.1, 0.2]
+split = [0.9, 0.1, 0.0]
 seed = 678452
 
 if __name__ == '__main__':
@@ -40,25 +55,39 @@ if __name__ == '__main__':
     if not os.path.exists(model_folder): os.mkdir(model_folder)
 
     # Gather ids and GDT-TS scores from csv
-    ids = []
-    scores = []
+    x_data = []
+    x_test = []
+    y_scores = []
+    y_test_scores = []
     data_folder = '/'.join(data_path.split('/')[:-1]) +'/'
     with open(data_folder+data_folder.split('/')[-2]+'.csv', 'r') as f:
         lines = f.readlines()
         for i in range(len(lines)):
             x = lines[i].split(',')
             if i >= 1:
-                id_ = x[0]; score = float(x[1])
-                ids.append(id_); scores.append(score)
-    x_data = np.array(ids)
-    scores = np.array(scores)
+                id_ = x[0]
+                score = float(x[1])
+                if id_.split('_')[0] in training_targets:
+                    x_data.append(id_)
+                    y_scores.append(score)
+                elif id_.split('_')[0] in test_targets:
+                    x_test.append(id_)
+                    y_test_scores.append(score)
+    x_data = np.array(x_data)
+    y_scores = np.array(y_scores)
+    x_test = np.array(x_test)
+    y_test_scores = np.array(y_test_scores)
 
-    # Split training and test data
-    x_data, x_test, y_scores, y_test_scores = train_test_split(x_data, scores, test_size=split[2], random_state=seed)
-
-    # Load HDF5 dataset
-    f = hp.File(data_path, "r")
-    data_set = f['dataset']
+    # Shuffle Chunks
+    i = (len(x_data) // 10000) * 10000
+    x_data_ = x_data[:i].reshape(-1,10000)
+    y_scores_ = y_scores[:i].reshape(-1,10000)
+    np.random.seed(seed)
+    p = np.random.permutation(len(x_data_))
+    x_data_ = x_data_[p]
+    y_scores_ = y_scores_[p]
+    x_data = np.concatenate([x_data_.flatten(),x_data[i:]])
+    y_scores = np.concatenate([y_scores_.flatten(),y_scores[i:]])
 
     # Train Rankings
     history = []
@@ -84,7 +113,11 @@ if __name__ == '__main__':
         print('Positive:',len(np.where(y_data == 1)[0]),'Negative:', len(np.where(y_data == 0)[0]))
 
         # Split file paths into training, test and validation
-        x_train, x_val, y_train, y_val = train_test_split(x_data, y_data, test_size=split[1]/(split[0]+split[1]), random_state=seed)
+        s = int((len(x_data) // 10000) * 0.2) * 10000
+        x_train = x_data[s:]
+        x_val = x_data[:s]
+        y_train = y_data[s:]
+        y_val = y_data[:s]
 
         # Training Loop
         best_val_loss = None
@@ -93,12 +126,27 @@ if __name__ == '__main__':
 
             # Fit training data
             print('Fitting:')
+            err = 0
             train_status = []
             batch_x = []
             batch_y = []
+            hset_ = x_train[0].split('_')[0]
+            f = hp.File(data_path+hset_+'.hdf5', "r")
+            data_set = f['dataset']
             for j in tqdm(range(len(x_train))):
-                try: x = np.array(data_set[x_train[j]])
-                except: continue
+                xx = x_train[j].split('_')
+                hset = xx[0]
+                dset = x_train[j][len(hset)+1:]
+                if hset != hset_:
+                    hset_ = hset
+                    f.close()
+                    f = hp.File(data_path+hset+'.hdf5', "r")
+                    data_set = f['dataset']
+                try:
+                    x = np.array(data_set[dset])
+                except:
+                    err += 1
+                    continue
                 batch_x.append(x)
                 y = one_hot(y_train[j], num_classes=2)
                 #y = y.reshape((2))
@@ -117,15 +165,31 @@ if __name__ == '__main__':
             train_acc = np.average(train_status[:,1])
             print('Train Loss ->', train_loss)
             print('Train Accuracy ->', train_acc,'\n')
+            print('Errored Entries:', err)
 
             # Test on validation data
             print('Evaluating:')
+            err = 0
             val_status = []
             batch_x = []
             batch_y = []
+            hset_ = x_val[0].split('_')[0]
+            f = hp.File(data_path+hset_+'.hdf5', "r")
+            data_set = f['dataset']
             for j in tqdm(range(len(x_val))):
-                try: x = np.array(data_set[x_val[j]])
-                except: continue
+                xx = x_val[j].split('_')
+                hset = xx[0]
+                dset = x_val[j][len(hset)+1:]
+                if hset != hset_:
+                    hset_ = hset
+                    f.close()
+                    f = hp.File(data_path+hset+'.hdf5', "r")
+                    data_set = f['dataset']
+                try:
+                    x = np.array(data_set[dset])
+                except:
+                    err += 1
+                    continue
                 batch_x.append(x)
                 y = one_hot(y_val[j], num_classes=2)
                 #y = y.reshape((2))
@@ -144,10 +208,10 @@ if __name__ == '__main__':
             val_acc = np.average(val_status[:,1])
             print('Val Loss ->', val_loss)
             print('Val Accuracy ->', val_acc,'\n')
+            print('Errored Entries:', err)
 
             if best_val_loss == None or val_loss < best_val_loss:
                 best_val_loss = val_loss
-
                 # Save weights of model
                 model.save_weights(model_path+'.hdf5')
 
@@ -179,10 +243,23 @@ if __name__ == '__main__':
         print("Running Inference On Threshold:", rank)
         batch_x = []
         batch_j = []
+        hset_ = x_test[0].split('_')[0]
+        f = hp.File(data_path+hset_+'.hdf5', "r")
+        data_set = f['dataset']
         for j in tqdm(range(len(x_test))):
             if rankings_dict[x_test[j]][1] == i:
-                try: x = np.array(data_set[x_test[j]])
-                except: continue
+                xx = x_test[j].split('_')
+                hset = xx[0]
+                dset = x_test[j][len(hset)+1:]
+                if hset != hset_:
+                    hset_ = hset
+                    f.close()
+                    f = hp.File(data_path+hset+'.hdf5', "r")
+                    data_set = f['dataset']
+                try:
+                    x = np.array(data_set[dset])
+                except:
+                    continue
                 possible_hits += 1
                 batch_x.append(x)
                 batch_j.append(j)
@@ -202,7 +279,7 @@ if __name__ == '__main__':
         ranking = rankings_dict[key]
         if ranking[0] == ranking[1]:
             hits += 1
-    test_acc = float(hits) / len(possible_hits)
+    test_acc = float(hits) / len(x_test)
     print("Test Accuracy:", test_acc)
 
     # Save training history to csv file
