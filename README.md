@@ -1,6 +1,6 @@
 # Deep Protein Scoring
 
-Spring BLUR 2018 Project
+Spring SULI 2018 Project
 
 Last Updated: 4/23/18
 
